@@ -1,38 +1,40 @@
 import streamlit as st
+import psycopg2
+import os
+from datetime import datetime
 
-# Настройка страницы
-st.set_page_config(page_title="VisionEra Dashboard", layout="wide")
+st.set_page_config(page_title="VisionEra Professional", layout="wide")
 
-st.title("📹 VisionEra - Система наблюдения")
-st.write("Добро пожаловать в панель управления камерами (MVP версия).")
+DB_NAME = os.getenv("POSTGRES_DB", "visionera_db")
+DB_USER = os.getenv("POSTGRES_USER", "admin")
+DB_PASS = os.getenv("POSTGRES_PASSWORD", "password")
+DB_HOST = os.getenv("DB_HOST", "db")
 
-# Боковая панель для навигации
-st.sidebar.header("Управление")
-camera_choice = st.sidebar.selectbox(
-    "Выберите камеру для просмотра:",
-    ["Камера 1 (Главный вход)", "Камера 2 (Коридор)", "Камера 3 (Серверная)"]
-)
+def init_db():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS logs (id SERIAL PRIMARY KEY, event TEXT, time TIMESTAMP);")
+    conn.commit()
+    return conn, cur
 
-# Главный экран
-st.subheader(f"Трансляция: {camera_choice}")
+st.title("📹 VisionEra Professional - Monitoring")
 
-# Статус
-st.success("Статус: Устройство в сети. Идет трансляция.")
+try:
+    conn, cur = init_db()
+    st.sidebar.success("Подключено к PostgreSQL")
+except Exception as e:
+    st.sidebar.error(f"Ошибка БД: {e}")
 
-# Имитация картинки с камеры (заглушки из интернета)
-if camera_choice == "Камера 1 (Главный вход)":
-    st.image("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", caption="Прямой эфир: Вход", use_column_width=True)
-elif camera_choice == "Камера 2 (Коридор)":
-    st.image("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80", caption="Прямой эфир: Коридор", use_column_width=True)
-else:
-    st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80", caption="Прямой эфир: Серверная", use_column_width=True)
+# Интерфейс
+camera = st.sidebar.selectbox("Камера:", ["Вход", "Склад"])
+if st.button("Зафиксировать событие"):
+    cur.execute("INSERT INTO logs (event, time) VALUES (%s, %s)", (f"Движение на {camera}", datetime.now()))
+    conn.commit()
+    st.toast("Событие сохранено в БД!")
 
-st.divider()
-
-# Лог событий
-st.write("Лог системы:")
-st.code("""
-[12:00:01] Система инициализирована
-[12:02:15] Подключение к Камере 1 - Успешно
-[12:05:30] Движение не зафиксировано
-""", language="text")
+# Вывод логов из БД
+st.subheader("Последние события из базы данных:")
+cur.execute("SELECT event, time FROM logs ORDER BY time DESC LIMIT 5")
+rows = cur.fetchall()
+for row in rows:
+    st.write(f"🕒 {row[1].strftime('%H:%M:%S')} — {row[0]}")
