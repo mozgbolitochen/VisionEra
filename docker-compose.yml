@@ -10,12 +10,13 @@ services:
     depends_on:
       - web
       - adminer
+      - monitoring
   web:
     build: .
-    expose:
+#    expose:
+#      - "8501"
+    ports:
       - "8501"
-#    ports:
-#      - "8501:8080"
     volumes:
       - ./media:/app/media
     environment:
@@ -37,20 +38,20 @@ services:
   adminer:
     image: adminer
     restart: always
-    expose:
+#    expose:
+#      - "8080"
+    ports:
       - "8080"
-#    ports:
-#      - "8080:8080"
     depends_on:
       - db
   monitoring:
     image: netdata/netdata:latest
     restart: always
     hostname: visionera-monitor
-    expose:
+#    expose:
+#      - "19999"
+    ports:
       - "19999"
-#    ports:
-#      - "19999:19999"
     cap_add:
       - SYS_PTRACE
       - NET_ADMIN
