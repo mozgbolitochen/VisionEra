@@ -39,5 +39,28 @@ services:
       - "8080"
     depends_on:
       - db
+  monitoring:
+    image: netdata/netdata:latest
+    restart: always
+    hostname: visionera-monitor
+    expose:
+      - "19999"
+    cap_add:
+      - SYS_PTRACE
+      - NET_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 volumes:
   postgres_data:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
