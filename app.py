@@ -42,7 +42,6 @@ except Exception as e:
     st.sidebar.error(f"Ошибка БД: {e}")
 
 # Интерфейс
-camera = st.sidebar.selectbox("Камера:", ["Вход", "Склад"])
 if st.button("Зафиксировать событие"):
     cur.execute("INSERT INTO logs (event, time) VALUES (%s, %s)", (f"Движение на {camera}", datetime.now()))
     conn.commit()
