@@ -3,6 +3,8 @@ import psycopg2
 import os
 from datetime import datetime
 
+st.set_page_config(page_title="VisionEra Professional", layout="wide") # Должно быть вызвано первым, НЕ МЕНЯТЬ
+
 MEDIA_PATH = "./media"
 
 st.sidebar.header("Наблюдение")
@@ -18,8 +20,6 @@ if os.path.exists(photo_path):
 else:
     st.warning(f"Файл {photo_filename} не найден в папке media. Загрузите его на сервер.")
     st.image("https://i.ytimg.com/vi/0qslwZxdH4o/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGQgZChkMA8=&amp;rs=AOn4CLAHY9reFMDaJK4a0iTCHhK0QCSDuQ", use_column_width=True)
-
-st.set_page_config(page_title="VisionEra Professional", layout="wide")
 
 DB_NAME = os.getenv("POSTGRES_DB", "visionera_db")
 DB_USER = os.getenv("POSTGRES_USER", "admin")
