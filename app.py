@@ -3,6 +3,22 @@ import psycopg2
 import os
 from datetime import datetime
 
+MEDIA_PATH = "./media"
+
+st.sidebar.header("Наблюдение")
+camera = st.sidebar.selectbox("Камера:", ["Вход", "Склад"])
+
+st.subheader(f"Трансляция: {camera}")
+
+photo_filename = "entrance.png" if camera == "Вход" else "warehouse.png"
+photo_path = os.path.join(MEDIA_PATH, photo_filename)
+
+if os.path.exists(photo_path):
+    st.image(photo_path, caption=f"Прямой эфир — {camera}", use_column_width=True)
+else:
+    st.warning(f"Файл {photo_filename} не найден в папке media. Загрузите его на сервер.")
+    st.image("https://i.ytimg.com/vi/0qslwZxdH4o/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGQgZChkMA8=&amp;rs=AOn4CLAHY9reFMDaJK4a0iTCHhK0QCSDuQ", use_column_width=True)
+
 st.set_page_config(page_title="VisionEra Professional", layout="wide")
 
 DB_NAME = os.getenv("POSTGRES_DB", "visionera_db")
