@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visionera-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: visionera-web
+  template:
+    metadata:
+      labels:
+        app: visionera-web
+    spec:
+      containers:
+      - name: visionera-web
+        image: mozgbolitochen/visionera-web:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8501
+        env:
+        - name: DB_HOST
+          value: "db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: visionera-web-service
+spec:
+  selector:
+    app: visionera-web
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
+  type: ClusterIP
